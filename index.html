@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rational & Irrational Numbers — Challenge Quiz</title>
+  <style>
+    :root {
+      --navy:#0b2942; --navy2:#123d5c; --ink:#16324a; --muted:#60778b;
+      --cream:#fff9ef; --paper:#ffffff; --orange:#f28c28; --teal:#18a69a;
+      --green:#18845e; --red:#c84a4a; --line:#dbe6eb; --shadow:0 20px 60px rgba(11,41,66,.16);
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--ink); background:
+        radial-gradient(circle at 12% 12%, rgba(24,166,154,.16), transparent 25%),
+        radial-gradient(circle at 88% 88%, rgba(242,140,40,.16), transparent 27%),
+        var(--cream); display:grid; place-items:center; padding:24px;
+    }
+    body::before { content:"ℚ"; position:fixed; left:3vw; bottom:-5vh; font:700 26vw Georgia,serif; color:rgba(11,41,66,.025); pointer-events:none; }
+    button { font:inherit; }
+    .app { width:min(940px,100%); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; color:var(--navy); }
+    .brand { font-weight:900; letter-spacing:.02em; }
+    .badge { padding:7px 11px; border-radius:999px; background:var(--navy); color:white; font-size:.8rem; font-weight:800; }
+    .shell { background:rgba(255,255,255,.94); border:1px solid rgba(11,41,66,.08); border-radius:26px; box-shadow:var(--shadow); overflow:hidden; }
+    .hero { background:linear-gradient(135deg,var(--navy),var(--navy2)); color:white; padding:40px clamp(24px,6vw,64px); position:relative; overflow:hidden; }
+    .hero::after { content:"√2"; position:absolute; right:4%; top:-18px; font:800 8rem Georgia,serif; color:rgba(255,255,255,.07); transform:rotate(-8deg); }
+    .eyebrow { color:#86e0d8; text-transform:uppercase; letter-spacing:.16em; font-size:.78rem; font-weight:900; }
+    h1 { margin:10px 0 12px; font-size:clamp(2rem,5vw,3.8rem); line-height:1.03; max-width:720px; }
+    .hero p { margin:0; max-width:660px; color:#d9e8f1; line-height:1.6; }
+    .content { padding:clamp(24px,5vw,52px); }
+    .facts { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:0 0 26px; }
+    .fact { background:#f3f8fa; border:1px solid var(--line); border-radius:16px; padding:14px; text-align:center; }
+    .fact strong { display:block; font-size:1.25rem; color:var(--navy); }
+    .fact span { color:var(--muted); font-size:.82rem; }
+    .primary,.secondary,.next-btn { border:0; border-radius:13px; cursor:pointer; font-weight:850; transition:.18s ease; }
+    .primary { background:var(--orange); color:#261708; padding:14px 24px; box-shadow:0 8px 20px rgba(242,140,40,.28); }
+    .primary:hover,.next-btn:hover { transform:translateY(-2px); filter:brightness(1.04); }
+    .secondary { background:white; color:var(--navy); border:1px solid var(--line); padding:12px 18px; }
+    .screen { display:none; }
+    .screen.active { display:block; animation:fade .3s ease; }
+    @keyframes fade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .quiz-head { padding:22px clamp(20px,4vw,38px) 0; }
+    .head-row { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
+    .counter { font-weight:900; color:var(--navy); }
+    .score { font-weight:800; color:var(--teal); }
+    .progress { height:9px; background:#e7eef1; border-radius:99px; overflow:hidden; }
+    .progress > div { height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--orange)); transition:width .35s ease; }
+    .question-card { padding:clamp(24px,5vw,48px); min-height:520px; display:flex; flex-direction:column; }
+    .topic { align-self:flex-start; background:#e8f7f5; color:#087a72; border-radius:999px; padding:7px 11px; font-size:.78rem; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    .question { margin:18px 0 22px; color:var(--navy); font-size:clamp(1.25rem,3vw,2rem); line-height:1.35; font-weight:850; }
+    .math { font-family:Cambria Math,STIX Two Math,Georgia,serif; font-weight:700; }
+    .over { text-decoration:overline; text-decoration-thickness:1.5px; }
+    .options { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    .option { width:100%; min-height:72px; display:flex; align-items:center; gap:14px; text-align:left; padding:14px 16px; border:2px solid var(--line); border-radius:16px; background:white; color:var(--ink); cursor:pointer; transition:.18s ease; }
+    .option:hover:not(:disabled),.option:focus-visible:not(:disabled) { border-color:var(--teal); background:#f5fcfb; transform:translateY(-2px); outline:none; }
+    .letter { flex:0 0 36px; height:36px; display:grid; place-items:center; border-radius:11px; background:#eef4f6; color:var(--navy); font-weight:900; }
+    .option.correct { border-color:var(--green); background:#effaf5; }
+    .option.correct .letter { background:var(--green); color:white; }
+    .option.wrong { border-color:var(--red); background:#fff3f2; }
+    .option.wrong .letter { background:var(--red); color:white; }
+    .option:disabled { cursor:default; }
+    .feedback { display:none; margin-top:20px; border-radius:16px; padding:16px 18px; line-height:1.5; }
+    .feedback.show { display:block; animation:fade .25s ease; }
+    .feedback.good { background:#eaf8f2; border-left:5px solid var(--green); }
+    .feedback.bad { background:#fff1ef; border-left:5px solid var(--red); }
+    .feedback strong { display:block; margin-bottom:4px; }
+    .question-foot { margin-top:auto; padding-top:18px; display:flex; justify-content:space-between; align-items:center; gap:14px; }
+    .hint-btn { border:0; background:transparent; color:var(--muted); cursor:pointer; font-weight:800; padding:8px 0; }
+    .hint { display:none; color:var(--muted); background:#f6f8f9; border-radius:12px; padding:10px 13px; margin-top:8px; font-size:.92rem; }
+    .hint.show { display:block; }
+    .next-btn { display:none; background:var(--navy); color:white; padding:12px 18px; }
+    .next-btn.show { display:inline-block; }
+    .result-wrap { padding:clamp(30px,6vw,64px); text-align:center; }
+    .ring { width:150px; height:150px; margin:0 auto 20px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(var(--teal) 0deg, #e5edf0 0deg); position:relative; }
+    .ring::after { content:""; position:absolute; inset:13px; border-radius:50%; background:white; }
+    .ring-value { z-index:1; font-size:2.2rem; font-weight:950; color:var(--navy); }
+    .result-wrap h2 { font-size:2rem; margin:10px 0; color:var(--navy); }
+    .result-wrap p { color:var(--muted); }
+    .breakdown { margin:26px auto; max-width:650px; display:grid; gap:9px; text-align:left; }
+    .review { border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; gap:18px; }
+    .review.bad { border-left:4px solid var(--red); }
+    .review.good { border-left:4px solid var(--green); }
+    .review span:last-child { font-weight:900; white-space:nowrap; }
+    .actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+    .kbd { font-size:.78rem; color:var(--muted); margin-top:18px; }
+    @media (max-width:650px) {
+      body{padding:10px}.options{grid-template-columns:1fr}.facts{grid-template-columns:1fr}.question-card{min-height:610px}.topbar{padding:0 5px}.hero{padding:30px 24px}.hero::after{font-size:5rem}
+    }
+    @media (prefers-reduced-motion:reduce) { *{animation:none!important;transition:none!important} }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar"><div class="brand">REAL NUMBER LAB</div><div class="badge">HARD • 12 QUESTIONS</div></div>
+    <section class="shell">
+      <div id="start" class="screen active">
+        <div class="hero">
+          <div class="eyebrow">Grade 9 mathematics</div>
+          <h1>Rational or irrational?</h1>
+          <p>Use decimal patterns, fractions, radicals, approximations, powers, and scientific notation to survive this book-based challenge.</p>
+        </div>
+        <div class="content">
+          <div class="facts">
+            <div class="fact"><strong>12</strong><span>challenging questions</span></div>
+            <div class="fact"><strong>4</strong><span>choices per question</span></div>
+            <div class="fact"><strong>Instant</strong><span>feedback and solution</span></div>
+          </div>
+          <button class="primary" id="startBtn">Start challenge</button>
+          <div class="kbd">Tip: use keys A–D to answer. The quiz advances automatically.</div>
+        </div>
+      </div>
+
+      <div id="quiz" class="screen">
+        <div class="quiz-head">
+          <div class="head-row"><div class="counter" id="counter"></div><div class="score" id="score"></div></div>
+          <div class="progress" aria-label="Quiz progress"><div id="progress"></div></div>
+        </div>
+        <div class="question-card">
+          <div class="topic" id="topic"></div>
+          <div class="question" id="question"></div>
+          <div class="options" id="options"></div>
+          <div class="feedback" id="feedback" aria-live="polite"></div>
+          <div id="hint" class="hint"></div>
+          <div class="question-foot">
+            <button class="hint-btn" id="hintBtn">Need a hint?</button>
+            <button class="next-btn" id="nextBtn">Next question →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="result" class="screen">
+        <div class="result-wrap">
+          <div class="ring" id="ring"><div class="ring-value" id="ringValue"></div></div>
+          <h2 id="resultTitle"></h2>
+          <p id="resultText"></p>
+          <div class="breakdown" id="breakdown"></div>
+          <div class="actions"><button class="primary" id="restartBtn">Try again</button><button class="secondary" id="printBtn">Print results</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        topic:"Set classification",
+        q:"Which row contains <em>only rational numbers</em>?",
+        options:[
+          "√17, &nbsp;22/7, &nbsp;14.<span class='over'>3</span>",
+          "√4, &nbsp;22/7, &nbsp;−3.41111…",
+          "π + 3, &nbsp;0.51, &nbsp;−8",
+          "√π, &nbsp;60/10, &nbsp;0"
+        ],
+        answer:1,
+        hint:"A decimal is rational if it terminates or eventually repeats. Also simplify perfect-square roots.",
+        why:"√4 = 2, 22/7 is a fraction, and −3.41111… eventually repeats. In every other row, √17, π + 3, or √π is irrational.",
+        feedback:["√17 is irrational because 17 is not a perfect square.","All three values can be expressed as fractions.","π + 3 remains irrational.","√π is irrational."]
+      },
+      {
+        topic:"Nested sets",
+        q:"What is the <em>smallest</em> standard number set containing <span class='math'>−√49</span>?",
+        options:["Natural numbers ℕ","Integers ℤ","Non-integer rationals ℚ \\ ℤ","Irrationals ℝ \\ ℚ"],
+        answer:1,
+        hint:"Simplify the radical before choosing the smallest set.",
+        why:"−√49 = −7. It is an integer, so ℤ is the smallest set listed that contains it.",
+        feedback:["−7 is negative, so it is not natural.","−√49 simplifies to the integer −7.","−7 is rational, but it is not a non-integer rational.","A square root of a perfect square is rational."]
+      },
+      {
+        topic:"Decimal patterns",
+        q:"Classify <span class='math'>0.404004000400004…</span>, where one more zero appears between successive 4s.",
+        options:["Terminating decimal","Non-terminating repeating decimal","Non-terminating non-repeating decimal","Integer written as a decimal"],
+        answer:2,
+        hint:"Ask whether a fixed block of digits repeats forever.",
+        why:"The gaps between the 4s keep changing, so no fixed block repeats. The decimal is non-terminating and non-repeating, hence irrational.",
+        feedback:["The decimal continues forever.","The pattern changes because the number of zeros increases.","There is no fixed repeating block, so the number is irrational.","The value lies strictly between 0 and 1, so it is not an integer."]
+      },
+      {
+        topic:"Repeating decimal → fraction",
+        q:"Write <span class='math'>4.5888…</span> as an irreducible fraction. Only the digit 8 repeats.",
+        options:["413/90","229/50","371/90","206/45"],
+        answer:0,
+        hint:"Let x = 4.5888…; compare 100x with 10x to remove the repeating tail.",
+        why:"100x − 10x = 458.888… − 45.888… = 413, so 90x = 413 and x = 413/90.",
+        feedback:["Subtracting 10x from 100x gives 90x = 413.","229/50 = 4.58, which terminates.","371/90 = 4.1222…, not 4.5888….","206/45 = 4.5777…, so the repeating digit is wrong."]
+      },
+      {
+        topic:"Terminating-decimal test",
+        q:"Why does <span class='math'>45/120</span> have a terminating decimal representation?",
+        options:[
+          "Its original denominator is a multiple of 10",
+          "It simplifies to 3/8, and 8 = 2³",
+          "Every fraction with denominator 120 terminates",
+          "The numerator 45 is an odd number"
+        ],
+        answer:1,
+        hint:"Reduce the fraction first, then factor its denominator.",
+        why:"45/120 = 3/8. In lowest terms, the denominator contains only the prime factor 2, so its decimal terminates: 0.375.",
+        feedback:["A denominator need not be a multiple of 10; its reduced prime factors matter.","The reduced denominator 2³ guarantees a terminating decimal.","For example, 1/120 does not terminate because 120 contains a factor 3.","The parity of the numerator does not decide whether the decimal terminates."]
+      },
+      {
+        topic:"Exact radical operations",
+        q:"If <span class='math'>x = 3√6/5</span> and <span class='math'>y = −7√6/4</span>, what is <span class='math'>x − y</span>?",
+        options:["−23√6/20","47√6/20","23√6/20","47√12/20"],
+        answer:1,
+        hint:"Subtracting a negative becomes addition; then combine the coefficients of √6.",
+        why:"x − y = 3√6/5 + 7√6/4 = (12 + 35)√6/20 = 47√6/20.",
+        feedback:["This treats subtraction of a negative as subtraction.","The common denominator is 20 and the coefficients add to 47.","The coefficient sum should be 12 + 35, not 23.","Like radicals combine without multiplying the radicands."]
+      },
+      {
+        topic:"Powers",
+        q:"Simplify exactly: <span class='math'>(√(1/2))³ × √(1/2)</span>.",
+        options:["1/2","1/4","√2/4","1/8"],
+        answer:1,
+        hint:"The bases are identical, so add the exponents.",
+        why:"(√(1/2))³ × √(1/2) = (√(1/2))⁴ = (1/2)² = 1/4.",
+        feedback:["This stops after squaring instead of raising the square root to the fourth power.","Adding exponents gives a fourth power, equal to 1/4.","The radical disappears because the total exponent is even.","(1/2)³ would come from a different exponent calculation."]
+      },
+      {
+        topic:"Density of rational numbers",
+        q:"Which rational number lies strictly between <span class='math'>4/7</span> and <span class='math'>8/13</span>?",
+        options:["4/5","3/5","5/9","8/11"],
+        answer:1,
+        hint:"Compare the values with 0.57 and 0.62, or use the mediant.",
+        why:"4/7 ≈ 0.5714 and 8/13 ≈ 0.6154. Since 3/5 = 0.6, it lies strictly between them.",
+        feedback:["4/5 = 0.8, which is above both endpoints.","0.5714… < 0.6 < 0.6154….","5/9 ≈ 0.5556, which is below 4/7.","8/11 ≈ 0.7273, which is above 8/13."]
+      },
+      {
+        topic:"Approximation",
+        q:"For <span class='math'>−√14 ≈ −3.741657…</span>, choose the approximation <em>by default</em> and <em>by excess</em> to the nearest hundredth.",
+        options:[
+          "Default −3.74; excess −3.75",
+          "Default −3.75; excess −3.74",
+          "Default −3.74; excess −3.73",
+          "Default −3.75; excess −3.76"
+        ],
+        answer:1,
+        hint:"On the number line, a default approximation is below the exact value—even for a negative number.",
+        why:"−3.75 < −3.741657… < −3.74. Therefore −3.75 is the hundredth approximation by default and −3.74 is by excess.",
+        feedback:["For a negative number, −3.74 is greater than the exact value, not smaller.","These values bracket −√14 in the correct order.","−3.73 is not the closest hundredth above the number.","−3.76 is below −3.75 and cannot be the approximation by excess."]
+      },
+      {
+        topic:"Scientific notation",
+        q:"Write in scientific notation: <span class='math'>(0.00072 × 3 × 10⁵) ÷ (1.2 × 10⁻²)</span>.",
+        options:["1.8 × 10²","1.8 × 10³","1.8 × 10⁴","18 × 10⁴"],
+        answer:2,
+        hint:"First write 0.00072 as 7.2 × 10⁻⁴, then combine coefficients and powers of 10.",
+        why:"0.00072 × 3 × 10⁵ = 216. Dividing by 1.2 × 10⁻² gives 18,000 = 1.8 × 10⁴.",
+        feedback:["This is 100 times too small.","This is 10 times too small.","The value is 18,000, whose normalized form is 1.8 × 10⁴.","Scientific notation requires a coefficient at least 1 and less than 10."]
+      },
+      {
+        topic:"Geometry & exact values",
+        q:"A right triangle has perpendicular sides <span class='math'>2</span> and <span class='math'>√3</span>. Which statement about its hypotenuse is true?",
+        options:[
+          "It is √5 and irrational",
+          "It is √7 and irrational",
+          "It is 7 and natural",
+          "It is 2 + √3 and irrational"
+        ],
+        answer:1,
+        hint:"Use c² = a² + b²; do not add side lengths directly.",
+        why:"c² = 2² + (√3)² = 4 + 3 = 7, so c = √7. Since 7 is not a perfect square, √7 is irrational.",
+        feedback:["The squares add to 7, not 5.","Pythagoras gives c = √7, an irrational number.","The equation gives c² = 7, not c = 7.","The hypotenuse is not found by adding the two legs."]
+      },
+      {
+        topic:"Simplify, then classify",
+        q:"Simplify <span class='math'>(√18 − √8) / √2</span> and choose its smallest number set.",
+        options:["1, a natural number","√2, an irrational number","2, a natural number","1/2, a non-integer rational"],
+        answer:0,
+        hint:"Rewrite √18 and √8 as multiples of √2 before dividing.",
+        why:"√18 = 3√2 and √8 = 2√2. Thus (3√2 − 2√2)/√2 = √2/√2 = 1, which is natural.",
+        feedback:["The expression simplifies completely to 1, which belongs to ℕ.","The √2 cancels with the denominator.","The coefficients subtract to 1, not 2.","No factor of 2 remains in the denominator."]
+      }
+    ];
+
+    const els = {
+      start:document.getElementById('start'), quiz:document.getElementById('quiz'), result:document.getElementById('result'),
+      startBtn:document.getElementById('startBtn'), counter:document.getElementById('counter'), score:document.getElementById('score'),
+      progress:document.getElementById('progress'), topic:document.getElementById('topic'), question:document.getElementById('question'),
+      options:document.getElementById('options'), feedback:document.getElementById('feedback'), hint:document.getElementById('hint'),
+      hintBtn:document.getElementById('hintBtn'), nextBtn:document.getElementById('nextBtn'), ring:document.getElementById('ring'),
+      ringValue:document.getElementById('ringValue'), resultTitle:document.getElementById('resultTitle'), resultText:document.getElementById('resultText'),
+      breakdown:document.getElementById('breakdown'), restartBtn:document.getElementById('restartBtn'), printBtn:document.getElementById('printBtn')
+    };
+    let index=0, points=0, locked=false, timer=null, attempts=[];
+
+    function show(name){
+      [els.start,els.quiz,els.result].forEach(x=>x.classList.remove('active'));
+      els[name].classList.add('active');
+    }
+    function startQuiz(){
+      index=0; points=0; locked=false; attempts=[]; clearTimeout(timer); show('quiz'); render();
+    }
+    function render(){
+      locked=false; const item=questions[index];
+      els.counter.textContent=`Question ${index+1} of ${questions.length}`;
+      els.score.textContent=`Score ${points}/${index}`;
+      els.progress.style.width=`${(index/questions.length)*100}%`;
+      els.topic.textContent=item.topic; els.question.innerHTML=item.q;
+      els.feedback.className='feedback'; els.feedback.innerHTML='';
+      els.hint.className='hint'; els.hint.textContent=item.hint; els.hintBtn.style.visibility='visible';
+      els.nextBtn.classList.remove('show'); els.nextBtn.textContent=index===questions.length-1?'See results →':'Next question →';
+      els.options.innerHTML='';
+      item.options.forEach((label,i)=>{
+        const b=document.createElement('button'); b.className='option'; b.dataset.index=i;
+        b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span>${label}</span>`;
+        b.addEventListener('click',()=>answer(i)); els.options.appendChild(b);
+      });
+    }
+    function answer(choice){
+      if(locked) return; locked=true; clearTimeout(timer);
+      const item=questions[index], correct=choice===item.answer;
+      if(correct) points++;
+      attempts.push({correct,choice});
+      [...els.options.children].forEach((b,i)=>{
+        b.disabled=true;
+        if(i===item.answer) b.classList.add('correct');
+        if(i===choice && !correct) b.classList.add('wrong');
+      });
+      els.feedback.className=`feedback show ${correct?'good':'bad'}`;
+      els.feedback.innerHTML=`<strong>${correct?'Excellent reasoning!':'Not quite.'}</strong>${item.feedback[choice]}<br><b>Solution:</b> ${item.why}`;
+      els.hintBtn.style.visibility='hidden'; els.nextBtn.classList.add('show');
+      els.score.textContent=`Score ${points}/${index+1}`;
+      timer=setTimeout(next,4200);
+    }
+    function next(){
+      if(!locked) return; clearTimeout(timer);
+      if(index<questions.length-1){ index++; render(); }
+      else finish();
+    }
+    function finish(){
+      show('result'); const pct=Math.round(points/questions.length*100);
+      els.progress.style.width='100%'; els.ring.style.background=`conic-gradient(var(--teal) ${pct*3.6}deg,#e5edf0 0deg)`;
+      els.ringValue.textContent=`${pct}%`;
+      els.resultTitle.textContent=pct>=90?'Real-number expert!':pct>=70?'Strong work!':pct>=50?'Good foundation':'Review and retry';
+      els.resultText.textContent=`You answered ${points} of ${questions.length} questions correctly.`;
+      els.breakdown.innerHTML=questions.map((q,i)=>`<div class="review ${attempts[i].correct?'good':'bad'}"><span>${i+1}. ${q.topic}</span><span>${attempts[i].correct?'✓ Correct':'✕ Review'}</span></div>`).join('');
+    }
+    els.startBtn.addEventListener('click',startQuiz);
+    els.restartBtn.addEventListener('click',startQuiz);
+    els.printBtn.addEventListener('click',()=>window.print());
+    els.hintBtn.addEventListener('click',()=>els.hint.classList.toggle('show'));
+    els.nextBtn.addEventListener('click',next);
+    document.addEventListener('keydown',e=>{
+      if(!els.quiz.classList.contains('active')||locked) return;
+      const n=['a','b','c','d'].indexOf(e.key.toLowerCase());
+      if(n>=0) answer(n);
+    });
+  </script>
+</body>
+</html>
